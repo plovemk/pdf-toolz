@@ -4,8 +4,7 @@ const exec = require('mz/child_process').exec;
 const path = require('path');
 const _ = require('lodash');
 const {requireNativeExecutableSync} = require('require-native-executable');
-
-requireNativeExecutableSync('gs');
+// requireNativeExecutableSync('gs');
 
 /**
  * Split PDF into individual pges
@@ -14,11 +13,12 @@ requireNativeExecutableSync('gs');
  */
 async function splitPDF (pdfBuffer) {
     return WithTmpDir(async (tmpdir) => {
+      // const tmpdir = 'C:\\Users\\lovep\\Intouch\\intouch-tools';
         const inpath = path.join(tmpdir, 'in.pdf');
         // Write input files
         await fs.writeFile(inpath, pdfBuffer);
         // Split. Burst into individual file
-        const cmd = `gs -sDEVICE=pdfwrite -dSAFER -dPDFSETTINGS=/prepress -o page.%08d.pdf in.pdf`;
+        const cmd = `gswin64 -sDEVICE=pdfwrite -sSAFER -o page.%%08d.pdf in.pdf`;
         await exec(cmd, {cwd: tmpdir});
         // Read all the files, pg_0001.pdf, pg_0002.pdf
         const files = await fs.readdir(tmpdir);
@@ -46,9 +46,11 @@ async function combinePDF (pdfBuffers) {
     }
     // Combine
     return WithTmpDir(async (tmpdir) => {
+      // const tmpdir = 'C:\\Users\\lovep\\Intouch\\intouch-tools';
+      console.log('temp directory', tmpdir);
         const outpath = path.join(tmpdir, `out.pdf`);
         // Write input files & assemble command.
-        let cmd = `gs -sDEVICE=pdfwrite -dSAFER -dPDFSETTINGS=/prepress -o ${outpath}`;
+        let cmd = `gswin64 -sDEVICE=pdfwrite -sSAFER -o ${outpath}`;
         const promises = [];
         for (let i = 0; i < pdfBuffers.length; i++) {
             const pdfPath = path.join(tmpdir, `in-${i}.pdf`);
